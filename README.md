@@ -3,12 +3,12 @@
 A comprehensive comparison of K-Means and Mini-Batch K-Means clustering algorithms on air quality data, featuring automatic parameter tuning and detailed performance analysis.
 
 ## 📋 Table of Contents
-- [Overview](#overview)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Results](#results)
-- [Output Files](#output-files)
+- [Overview](#-overview)
+- [Features](#-features)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Results](#-results)
+- [Output Files](#-output-files)
 
 ## 🎯 Overview
 
