@@ -30,7 +30,7 @@ if not os.path.exists(output_dir):
 # =============================================================================
 print("\n--- BAGIAN 1: PERSIAPAN DATA ---")
 
-nama_file = "dataset/dataset.csv" 
+nama_file = "dataset/dataset_update.csv" 
 kolom_fitur = ['pm_sepuluh', 'pm_duakomalima', 'sulfur_dioksida', 'karbon_monoksida', 'ozon', 'nitrogen_dioksida']
 X_scaled = None
 df_clean = None
@@ -277,6 +277,48 @@ if X_scaled is not None:
     file_data_final = "comparison_auto_data_labeled.csv"
     df_clean.to_csv(os.path.join(output_dir, file_data_final), index=False)
     print(f"💾 Data final dengan label disimpan di folder output/")
+
+    # =============================================================================
+    # BAGIAN 7: ANALISIS KONTEKSTUAL (PERBAIKAN)
+    # =============================================================================
+    print("\n--- BAGIAN 7: ANALISIS KONTEKSTUAL ---")
+
+    # --- PERBAIKAN: Menggunakan .loc[df_clean.index] untuk mencocokkan baris ---
+    # Kita harus mengambil data dari df asli HANYA pada baris yang tersisa di df_clean
+    df_clean['parameter_pencemar_kritis'] = df.loc[df_clean.index, 'parameter_pencemar_kritis']
+    df_clean['kategori'] = df.loc[df_clean.index, 'kategori']
+    df_clean['stasiun'] = df.loc[df_clean.index, 'stasiun']
+    df_clean['periode'] = pd.to_datetime(df.loc[df_clean.index, 'periode'], format='%d/%m/%Y') # Format disesuaikan
+    df_clean['bulan'] = df_clean['periode'].dt.month
+
+    # Analysis by station
+    print("\n📍 Distribusi Cluster per Stasiun:")
+    station_dist = pd.crosstab(df_clean[f'cluster_kmeans_k{k_untuk_kmeans}'], 
+                            df_clean['stasiun'], 
+                            normalize='columns') * 100
+    print(station_dist.round(1))
+
+    # Analysis by official category
+    print("\n🏷️ Distribusi Cluster per Kategori:")
+    kategori_dist = pd.crosstab(df_clean[f'cluster_kmeans_k{k_untuk_kmeans}'], 
+                                df_clean['kategori'], 
+                                normalize='columns') * 100
+    print(kategori_dist.round(1))
+
+    # Analysis by critical parameter
+    print("\n⚠️ Distribusi Cluster per Parameter Pencemar Kritis:")
+    param_dist = pd.crosstab(df_clean[f'cluster_kmeans_k{k_untuk_kmeans}'], 
+                            df_clean['parameter_pencemar_kritis'], 
+                            normalize='columns') * 100
+    print(param_dist.round(1))
+
+    # Save to Excel
+    with pd.ExcelWriter(os.path.join(output_dir, "analisis_kontekstual.xlsx")) as writer:
+        station_dist.to_excel(writer, sheet_name='Per_Stasiun')
+        kategori_dist.to_excel(writer, sheet_name='Per_Kategori')
+        param_dist.to_excel(writer, sheet_name='Per_Parameter')
+
+    print("💾 Analisis kontekstual disimpan ke output/analisis_kontekstual.xlsx")
 
 else:
     print("\n❌ DATA TIDAK SIAP. Proses perbandingan dibatalkan.")
